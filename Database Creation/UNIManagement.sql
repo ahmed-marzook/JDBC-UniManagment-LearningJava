@@ -61,49 +61,70 @@ VALUES ('Hassan' , 'Marzook', 1),
 ('Tom' , 'Hird', 5), ('Carlos' , 'Juan', 3), ('Jimmy' , 'Jones', 4), ('Laura' , 'Bridgett', 1),
 ('Sarah' , 'Kent', 2);
 
-DROP procedure IF EXISTS `School`.`Student Teachers`;
+-- Creating Procedures
 
+-- List all the courses and who teaches them
 DELIMITER $$
-USE `School`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `Student Teacher`()
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CoursesAndTeachers`()
+BEGIN
+SELECT c.course_id ,c.course, t.teacher_first_name, t.teacher_last_name
+FROM courses c
+INNER JOIN teacher t ON t.teacher_id = c.course_teacher_id
+ORDER BY c.course_id;
+END$$
+
+DELIMITER ;
+
+-- List All the students and what course they do
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `StudentCourse`()
+BEGIN
+SELECT s.student_id ,s.student_first_name, s.student_last_name, c.course
+FROM student s
+INNER JOIN courses c ON s.student_course_id = c.course_id
+ORDER BY s.student_id;
+END$$
+
+DELIMITER ;
+
+-- List The students and who there teachers are
+DELIMITER $$
+CREATE DEFINER=`root`@`localhost` PROCEDURE `StudentTeacher`()
 BEGIN
 SELECT s.student_first_name, s.student_last_name, t.teacher_first_name, t.teacher_last_name
 FROM student s
 INNER JOIN courses c ON c.course_id = s.student_course_id
-INNER JOIN teacher t ON t.teacher_id = c.course_teacher_id;
+INNER JOIN teacher t ON t.teacher_id = c.course_teacher_id
+ORDER BY s.student_first_name;
 END$$
 
 DELIMITER ;
-;
 
-USE `School`;
-DROP procedure IF EXISTS `School`.`Student Courses`;
-
+-- Accepts teacher ID as parameter and List students they teach
 DELIMITER $$
-USE `School`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `Student Course`()
-BEGIN
-SELECT s.student_first_name, s.student_last_name, c.course
-FROM student s
-INNER JOIN courses c ON s.student_course_id = c.course_id;
-END$$
-
-DELIMITER ;
-;
-
-USE `School`;
-DROP procedure IF EXISTS `School`.`Teacher to Student`;
-
-DELIMITER $$
-USE `School`$$
-CREATE DEFINER=`root`@`localhost` PROCEDURE `Teacher to Student`(IN teacher_id int)
+CREATE DEFINER=`root`@`localhost` PROCEDURE `TeacherToStudent`(IN teacher_id int)
 BEGIN
 SELECT s.student_first_name, s.student_last_name, t.teacher_first_name, t.teacher_last_name, c.course
 FROM student s
 INNER JOIN courses c ON c.course_id = s.student_course_id
 INNER JOIN teacher t ON t.teacher_id = c.course_teacher_id
-WHERE t.teacher_id = teacher_id;
+WHERE t.teacher_id = teacher_id
+ORDER BY s.student_first_name;
 END$$
 
 DELIMITER ;
-;
+
+-- Total number of Students and Teachers
+DELIMITER $$
+CREATE PROCEDURE `TotalStudentsAndTeachers` ()
+BEGIN
+SELECT(
+SELECT COUNT(*)
+FROM student
+) AS Total_Students,
+(SELECT COUNT(*)
+FROM teacher
+) AS Total_Teachers;
+END$$
+
+DELIMITER ;
